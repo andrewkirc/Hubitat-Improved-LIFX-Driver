@@ -164,12 +164,44 @@ def activateMorphEffect() {
         httpPost(params) { resp ->
             if (resp.status == 207 || resp.status == 200) {
                 log.debug 'Morph effect activated successfully'
+                // Call method to adjust brightness
+                adjustBrightness()
             } else {
                 log.error "Error activating morph effect: HTTP ${resp.status} - ${resp.data}"
             }
         }
     } catch (Exception e) {
         log.error "Exception in activateMorphEffect: ${e.message}"
+    }
+}
+
+def adjustBrightness() {
+    log.debug 'Adjusting brightness to 40%'
+    def authString = "${apiToken}:"
+    def authEncoded = authString.bytes.encodeBase64().toString()
+    def headers = ['Authorization': "Basic ${authEncoded}"]
+    def body = [
+        brightness: 0.4
+    ]
+
+    def params = [
+        uri: 'https://api.lifx.com',
+        path: "/v1/lights/${selector}/state/delta",
+        headers: headers,
+        body: body,
+        contentType: 'application/json'
+    ]
+
+    try {
+        httpPost(params) { resp ->
+            if (resp.status == 207 || resp.status == 200) {
+                log.debug 'Brightness adjusted successfully'
+            } else {
+                log.error "Error adjusting brightness: HTTP ${resp.status} - ${resp.data}"
+            }
+        }
+    } catch (Exception e) {
+        log.error "Exception in adjustBrightness: ${e.message}"
     }
 }
 
