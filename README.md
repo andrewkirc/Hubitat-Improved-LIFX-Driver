@@ -61,7 +61,7 @@ You can use these commands in Hubitat apps, rules, or dashboard tiles.
 
 ## Support
 
-For support, please open an issue on the GitHub repository or contact the author, [https://andrewkirc.com](Andrew Kirchofer).
+For support, please open an issue on the GitHub repository or contact the author, (Andrew Kirchofer)[https://andrewkirc.com].
 
 ## License
 
