@@ -10,6 +10,7 @@ metadata {
     preferences {
         input name: 'apiToken', type: 'string', title: 'LIFX API Token', required: true, displayDuringSetup: false
         input name: 'sceneId', type: 'string', title: 'LIFX Scene ID', required: true, displayDuringSetup: false
+        input name: 'selector', type: 'string', title: 'LIFX Selector - https://api.developer.lifx.com/reference/selectors', required: true, displayDuringSetup: false
     }
 }
 
@@ -55,8 +56,7 @@ def activateScene() {
             if (resp.status == 200) {
                 log.debug 'Scene activated successfully'
                 sendEvent(name: 'switch', value: 'on')
-                state.lastSelector = getSceneLightsSelector()
-                log.debug "Last selector set to: ${state.lastSelector}"
+                log.debug "Using selector: ${selector}"
             } else {
                 log.error "Error activating scene: HTTP ${resp.status} - ${resp.data}"
             }
@@ -67,8 +67,8 @@ def activateScene() {
 }
 
 def deactivateScene() {
-    if (!state.lastSelector) {
-        log.warn 'No lights to turn off. Activate the scene first.'
+    if (!selector) {
+        log.warn 'No selector specified. Please set the LIFX Selector in preferences.'
         return
     }
 
@@ -80,7 +80,7 @@ def deactivateScene() {
 
     def params = [
         uri: 'https://api.lifx.com',
-        path: "/v1/lights/${state.lastSelector}/state",
+        path: "/v1/lights/${selector}/state",
         headers: headers,
         body: body,
         contentType: 'application/json'
@@ -91,7 +91,6 @@ def deactivateScene() {
             if (resp.status == 207 || resp.status == 200) {
                 log.debug 'Lights turned off successfully'
                 sendEvent(name: 'switch', value: 'off')
-                state.remove('lastSelector')
             } else {
                 log.error "Error turning off lights: HTTP ${resp.status} - ${resp.data}"
             }
@@ -134,8 +133,8 @@ def getSceneLightsSelector() {
 }
 
 def activateMorphEffect() {
-    if (!state.lastSelector) {
-        log.warn 'No lights to apply morph effect. Activate the scene first.'
+    if (!selector) {
+        log.warn 'No selector specified. Please set the LIFX Selector in preferences.'
         return
     }
 
@@ -154,7 +153,7 @@ def activateMorphEffect() {
 
     def params = [
         uri: 'https://api.lifx.com',
-        path: "/v1/lights/${state.lastSelector}/effects/morph",
+        path: "/v1/lights/${selector}/effects/morph",
         headers: headers,
         body: body,
         contentType: 'application/json'
@@ -174,8 +173,8 @@ def activateMorphEffect() {
 }
 
 def effectsOff() {
-    if (!state.lastSelector) {
-        log.warn 'No lights to turn off effects. Activate the scene first.'
+    if (!selector) {
+        log.warn 'No selector specified. Please set the LIFX Selector in preferences.'
         return
     }
 
@@ -186,7 +185,7 @@ def effectsOff() {
 
     def params = [
         uri: 'https://api.lifx.com',
-        path: "/v1/lights/${state.lastSelector}/effects/off",
+        path: "/v1/lights/${selector}/effects/off",
         headers: headers,
         contentType: 'application/json'
     ]
