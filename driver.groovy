@@ -11,6 +11,7 @@ metadata {
         input name: 'apiToken', type: 'string', title: 'LIFX API Token', required: true, displayDuringSetup: false
         input name: 'sceneId', type: 'string', title: 'LIFX Scene ID', required: true, displayDuringSetup: false
         input name: 'selector', type: 'string', title: 'LIFX Selector (e.g. all; label:Bedroom,label:Kitchen; id:d3b2f2d97452)', required: true, displayDuringSetup: false
+        input name: 'brightnessPercentage', type: 'number', title: 'Brightness Percentage (1-100)', defaultValue: 40, range: '1..100', required: true
     }
 }
 
@@ -176,12 +177,13 @@ def activateMorphEffect() {
 }
 
 def adjustBrightness() {
-    log.debug 'Adjusting brightness to 40%'
+    def brightness = (brightnessPercentage as Integer) / 100.0
+    log.debug "Adjusting brightness to ${brightnessPercentage}%"
     def authString = "${apiToken}:"
     def authEncoded = authString.bytes.encodeBase64().toString()
     def headers = ['Authorization': "Basic ${authEncoded}"]
     def body = [
-        brightness: 0.4
+        brightness: brightness
     ]
 
     def params = [
