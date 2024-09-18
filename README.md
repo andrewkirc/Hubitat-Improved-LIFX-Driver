@@ -1,7 +1,4 @@
-# Hubitat-Improved-LIFX-Driver
- An Improved LIFX Driver for Hubitat
-
- # LIFX Scene Device Driver for Hubitat
+# LIFX Scene Device Driver for Hubitat
 
 ## Overview
 
