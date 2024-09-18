@@ -11,7 +11,7 @@ metadata {
         input name: 'apiToken', type: 'string', title: 'LIFX API Token', required: true, displayDuringSetup: false
         input name: 'sceneId', type: 'string', title: 'LIFX Scene ID', required: true, displayDuringSetup: false
         input name: 'selector', type: 'string', title: 'LIFX Selector (e.g. all; label:Bedroom,label:Kitchen; id:d3b2f2d97452)', required: true, displayDuringSetup: false
-        input name: 'brightnessPercentage', type: 'number', title: 'EffectBrightness Percentage (1-100)', defaultValue: 40, range: '1..100', required: true
+        input name: 'brightnessPercentage', type: 'number', title: 'Effect Brightness Percentage (1-100)', defaultValue: 40, range: '1..100', required: true
     }
 }
 
