@@ -3,6 +3,8 @@ metadata {
         capability 'Actuator'
         capability 'Switch'
         command 'activateScene'
+        command 'activateMorphEffect'
+        command 'effectsOff'
     }
 
     preferences {
@@ -54,6 +56,7 @@ def activateScene() {
                 log.debug 'Scene activated successfully'
                 sendEvent(name: 'switch', value: 'on')
                 state.lastSelector = getSceneLightsSelector()
+                log.debug "Last selector set to: ${state.lastSelector}"
             } else {
                 log.error "Error activating scene: HTTP ${resp.status} - ${resp.data}"
             }
@@ -112,20 +115,91 @@ def getSceneLightsSelector() {
     ]
 
     try {
+        def selectorString = null
         httpGet(params) { resp ->
             if (resp.status == 200) {
                 def lights = resp.data.lights
                 def selectors = lights.collect { it.id }
-                def selectorString = 'id:' + selectors.join(',')
+                selectorString = 'id:' + selectors.join(',')
                 log.debug "Scene lights selector: ${selectorString}"
-                return selectorString
             } else {
                 log.error "Error fetching scene details: HTTP ${resp.status} - ${resp.data}"
-                return null
             }
         }
+        return selectorString
     } catch (Exception e) {
         log.error "Exception in getSceneLightsSelector: ${e.message}"
         return null
+    }
+}
+
+def activateMorphEffect() {
+    if (!state.lastSelector) {
+        log.warn 'No lights to apply morph effect. Activate the scene first.'
+        return
+    }
+
+    log.debug 'Activating morph effect on lights associated with the scene'
+    def authString = "${apiToken}:"
+    def authEncoded = authString.bytes.encodeBase64().toString()
+    def headers = ['Authorization': "Basic ${authEncoded}"]
+    def body = [
+        period: 5,
+        palette: [
+            [hue: 0, saturation: 1, brightness: 1],
+            [hue: 120, saturation: 1, brightness: 1],
+            [hue: 240, saturation: 1, brightness: 1]
+        ]
+    ]
+
+    def params = [
+        uri: 'https://api.lifx.com',
+        path: "/v1/lights/${state.lastSelector}/effects/morph",
+        headers: headers,
+        body: body,
+        contentType: 'application/json'
+    ]
+
+    try {
+        httpPost(params) { resp ->
+            if (resp.status == 207 || resp.status == 200) {
+                log.debug 'Morph effect activated successfully'
+            } else {
+                log.error "Error activating morph effect: HTTP ${resp.status} - ${resp.data}"
+            }
+        }
+    } catch (Exception e) {
+        log.error "Exception in activateMorphEffect: ${e.message}"
+    }
+}
+
+def effectsOff() {
+    if (!state.lastSelector) {
+        log.warn 'No lights to turn off effects. Activate the scene first.'
+        return
+    }
+
+    log.debug 'Turning off effects on lights associated with the scene'
+    def authString = "${apiToken}:"
+    def authEncoded = authString.bytes.encodeBase64().toString()
+    def headers = ['Authorization': "Basic ${authEncoded}"]
+
+    def params = [
+        uri: 'https://api.lifx.com',
+        path: "/v1/lights/${state.lastSelector}/effects/off",
+        headers: headers,
+        contentType: 'application/json'
+    ]
+
+    try {
+        httpPost(params) { resp ->
+            if (resp.status == 207 || resp.status == 200) {
+                log.debug 'Effects turned off successfully'
+            } else {
+                log.error "Error turning off effects: HTTP ${resp.status} - ${resp.data}"
+            }
+        }
+    } catch (Exception e) {
+        log.error "Exception in effectsOff: ${e.message}"
     }
 }
