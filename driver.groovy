@@ -143,11 +143,12 @@ def activateMorphEffect() {
     def authEncoded = authString.bytes.encodeBase64().toString()
     def headers = ['Authorization': "Basic ${authEncoded}"]
     def body = [
+        power_on: true,
         period: 5,
         palette: [
-            [hue: 0, saturation: 1, brightness: 1],
-            [hue: 120, saturation: 1, brightness: 1],
-            [hue: 240, saturation: 1, brightness: 1]
+            'red',
+            'green',
+            'blue'
         ]
     ]
 
